@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id           Int             @id @default(autoincrement())
+  email        String          @unique
+  password     String
+  is_deleted   Boolean         @default(false) @map("is_deleted")
+  deleted_date DateTime?       @map("deleted_date")
+  created_at   DateTime        @default(now()) @map("created_at")
+  updated_at   DateTime        @updatedAt @map("updated_at")
+  userLoggedIn UserLoggedIn[]
+  orders orders[]
+
+  @@map("users")
+}
+
+model UserLoggedIn {
+  id            Int      @id @default(autoincrement())
+  user_id       Int      @map("user_id")
+  user          Users    @relation(fields: [user_id], references: [id])
+  refresh_token String?  @map("refresh_token") @db.Text
+  created_at    DateTime @default(now()) @map("created_at")
+  updated_at    DateTime @updatedAt @map("updated_at")
+  is_deleted    Boolean  @default(false) @map("is_deleted")
+
+  @@map("user_loggedin")
+}
+
+model orders {
+  id            Int      @id @default(autoincrement())
+  user_id       Int      @map("user_id")
+  user          Users    @relation(fields: [user_id], references: [id])
+  created_at    DateTime @default(now()) @map("created_at")
+  updated_at    DateTime @updatedAt @map("updated_at")
+  created_by    Int   @map("created_by")
+  updated_by    Int   @map("updated_by")
+  is_deleted    Boolean  @default(false) @map("is_deleted")
+
+  @@map("orders")
+}
